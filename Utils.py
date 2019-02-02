@@ -21,6 +21,9 @@ def create_dataset(type):
     x_test = np.arange(0.05, 2 * np.pi, step)
     y_test = np.sin(2 * x_test)
 
+    y_train = np.reshape(y_train, (y_train.shape[0],1))
+    y_test = np.reshape(y_test, (y_test.shape[0],1))
+
     if type == 'sin':
         return x_train, y_train, x_test, y_test
 
@@ -30,7 +33,7 @@ def create_dataset(type):
         return x_train, y_train, x_test, y_test
 
 
-def compute_error(targets, predictions, error_type, binary=False):
+def compute_error(targets, predictions, error_type='are', binary=False):
     loss = 0
     error = 0
     if error_type is 'mse':

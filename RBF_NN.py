@@ -32,49 +32,54 @@ class rbf_model(object):
 
     def update_weights(self, f_approx):
         if self.error_type is 'delta':
-            self.weights += self.learning_rate * (self.targets - f_approx) * self.K
+            self.weights += self.learning_rate * np.dot((self.targets - f_approx).T, self.K.T)
         elif self.error_type is 'least_square':
             pass
 
     def fit(self):
 
-        for i in range(self.n_epochs):
+        error = 1
+        counter = 0
+        # for i in range(self.n_epochs):
+        while error > self.threshold:
+
             f_approx = self.forward_pass()
 
             self.update_weights(f_approx)
 
             error = self.evaluate(f_approx, self.targets)
-            print("Epoch: {0} and Error: {1}".format(i, error))
-            if error < self.threshold:
-                break
+            print("Epoch: {0} and Error: {1}".format(counter, error))
+            counter += 1
+            # if error < self.threshold:
+            #     break
 
         return self.weights
 
     def forward_pass(self):
         f_approx = np.dot(self.weights, self.K)
-        return f_approx
+        return f_approx.T
 
     def backwards_pass(self):
         pass
 
     def evaluate(self, predictions, targets):
 
-        if predictions is None:
-            predictions = self.forward_pass()
-        _, error = Utils.compute_error(targets, predictions, self.error_type)
+        _, error = Utils.compute_error(targets, predictions)
         return error
 
 
 if __name__ == "__main__":
     input_type = 'sin'
     error_type = 'mse'
-    n_hidden_units = 8
-    lr = 0.001
-    n_epochs = 10
+    n_hidden_units = 10
+    lr = 0.01
+    n_epochs = 100
     # NEED TO FIND A WAY TO COMPUTE THIS MEAN AND COV
-    mean = np.zeros(n_hidden_units)
+    mu, sigma = 0, 0.1  # mean and standard deviation
+
+    mean = np.random.normal(mu, sigma, n_hidden_units)
     # NEED TO FIND A WAY TO COMPUTE THIS MEAN AND COV
-    cov = np.ones(n_hidden_units)
+    cov = np.random.normal(mu, sigma, n_hidden_units)
 
     x_train, y_train, x_test, y_test = Utils.create_dataset(input_type)
 
