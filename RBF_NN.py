@@ -40,7 +40,11 @@ class rbf_model(object):
                                            np.dot(self.transformed_data.T, self.targets))
 
         else:
-            self.weights += (self.learning_rate * np.dot((self.targets - f_approx).T, self.transformed_data)).T
+            for data_index in range(len(self.data)):
+                inner = f_approx[data_index] - np.dot(self.transformed_data[data_index, :], self.weights)
+                self.weights = np.add(self.weights, np.reshape(self.learning_rate * inner *
+                                                               np.transpose(self.transformed_data[data_index, :]),
+                                                               np.shape(self.weights)))
 
     def fit(self):
 
@@ -59,7 +63,7 @@ class rbf_model(object):
                 break
 
             if self.batch_train:
-                print("number of hidden units: {0} and train Error: {1}".format(self.n_hidden_units, train_error))
+                print("number of hidden units: {0} train Error: {1}".format(self.n_hidden_units, train_error))
                 break
 
         print("Epoch: {0} and Error: {1}".format(self.n_epochs, train_error))
