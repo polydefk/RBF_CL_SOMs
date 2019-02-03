@@ -55,8 +55,8 @@ def create_dataset(type, noise=0):
         pass
 
     elif type == 'square':
-        y_train = [-1.0 if i >= 0.0 else 1.0 for i in y_train]
-        y_test = [-1.0 if i >= 0.0 else 1.0 for i in y_test]
+        y_train[y_train >= 0] = 1
+        y_test[y_test < 0] = -1
 
 
     if noise > 0:
