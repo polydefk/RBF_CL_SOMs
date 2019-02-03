@@ -49,20 +49,23 @@ def create_dataset(type, noise=0):
     y_train = np.reshape(y_train, (y_train.shape[0], 1))
     y_test = np.reshape(y_test, (y_test.shape[0], 1))
 
+
+
+    if type == 'sin':
+        pass
+
+    elif type == 'square':
+        y_train = [-1.0 if i >= 0.0 else 1.0 for i in y_train]
+        y_test = [-1.0 if i >= 0.0 else 1.0 for i in y_test]
+
+
     if noise > 0:
         x_train += np.random.normal(0, noise, x_train.shape)
         y_train += np.random.normal(0, noise, y_train.shape)
         x_test += np.random.normal(0, noise, x_test.shape)
         y_test += np.random.normal(0, noise, y_test.shape)
 
-    if type == 'sin':
-        return x_train, y_train, x_test, y_test
-
-    elif type == 'square':
-        y_train = [-1.0 if i >= 0.0 else 1.0 for i in y_train]
-        y_test = [-1.0 if i >= 0.0 else 1.0 for i in y_test]
-        return x_train, y_train, x_test, y_test
-
+    return x_train, y_train, x_test, y_test
 
 def even_rbf_center(count):
     mu_list = []
