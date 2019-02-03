@@ -44,7 +44,6 @@ class rbf_model(object):
 
     def fit(self):
 
-        counter = 0
         train_error = 0
         for i in range(self.n_epochs):
             # we shuffle and then calculate kernels again
@@ -59,11 +58,11 @@ class rbf_model(object):
             if train_error < self.threshold:
                 break
 
-            if batch_train:
+            if self.batch_train:
                 print("number of hidden units: {0} and train Error: {1}".format(self.n_hidden_units, train_error))
                 break
 
-        print("Epoch: {0} and Error: {1}".format(counter, train_error))
+        print("Epoch: {0} and Error: {1}".format(self.n_epochs, train_error))
         return self.weights
 
     def forward_pass(self, data, transform=False):
@@ -87,18 +86,10 @@ if __name__ == "__main__":
     n_epochs = 100
     batch_train = False
 
-    cov = 0.2
+    cov = 0.5
 
-    x_train, y_train, x_test, y_test = Utils.create_dataset(input_type, noise=0.1)
+    x_train, y_train, x_test, y_test = Utils.create_dataset(input_type)
 
-    for i in np.arange(1, len(x_train), 1):
-        # mean = Utils.compute_rbf_centers_competitive_learning(x_train, i, eta=0.2, iterations=100)
-
-        mean = Utils.compute_rbf_centers(i)
-
-        model = rbf_model(x_train, y_train, mean, cov, n_epochs, i, lr, batch_train=batch_train)
-
-        model.fit()
-
-        error = model.evaluate(x_test, y_test, transform=True)
-        print("number of hidden units: {0} and test Error: {1}".format(i, error))
+    mean = Utils.compute_rbf_centers(n_hidden_units)
+    model = rbf_model(x_train, y_train, mean, cov, n_epochs, n_hidden_units, lr, batch_train=batch_train)
+    model.fit()
