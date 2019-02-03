@@ -15,11 +15,12 @@ def compute_rbf_centers(count):
     return means
 
 
-def create_dataset(type):
+def create_dataset(type, noise=0):
     step = 0.1
 
     x_train = np.arange(0, 2 * np.pi, step)
     y_train = np.sin(2 * x_train)
+
 
     x_test = np.arange(0.05, 2 * np.pi, step)
     y_test = np.sin(2 * x_test)
@@ -29,6 +30,12 @@ def create_dataset(type):
 
     y_train = np.reshape(y_train, (y_train.shape[0],1))
     y_test = np.reshape(y_test, (y_test.shape[0],1))
+
+    if noise > 0:
+        x_train += np.random.normal(0, noise, x_train.shape)
+        y_train += np.random.normal(0, noise, y_train.shape)
+        x_test += np.random.normal(0, noise, x_test.shape)
+        y_test += np.random.normal(0, noise, y_test.shape)
 
     if type == 'sin':
         return x_train, y_train, x_test, y_test
