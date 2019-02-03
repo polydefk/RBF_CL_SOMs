@@ -41,8 +41,10 @@ class rbf_model(object):
 
         else:
             for data_index in range(len(self.data)):
-                inner = f_approx[data_index] - np.dot(self.transformed_data[data_index, :], self.weights)
-                self.weights = np.add(self.weights, np.reshape(self.learning_rate * inner *
+                error = self.targets[data_index] - f_approx[data_index]
+
+                # inner = self.targets[data_index] - np.dot(self.transformed_data[data_index, :], self.weights)
+                self.weights = np.add(self.weights, np.reshape(self.learning_rate * error *
                                                                np.transpose(self.transformed_data[data_index, :]),
                                                                np.shape(self.weights)))
 
@@ -85,15 +87,15 @@ class rbf_model(object):
 if __name__ == "__main__":
     input_type = 'sin'
     np.random.seed(123)
-    n_hidden_units = 4
-    lr = 0.01
+    num_hidden_units = 7
+    noise = 0.1
+    lr = 0.001
     n_epochs = 100
     batch_train = False
 
-    cov = 0.5
+    cov = 1
+    x_train, y_train, x_test, y_test = Utils.create_dataset(input_type, noise)
 
-    x_train, y_train, x_test, y_test = Utils.create_dataset(input_type)
-
-    mean = Utils.compute_rbf_centers(n_hidden_units)
-    model = rbf_model(x_train, y_train, mean, cov, n_epochs, n_hidden_units, lr, batch_train=batch_train)
+    mean = Utils.compute_rbf_centers(num_hidden_units)
+    model = rbf_model(x_train, y_train, mean, cov, n_epochs, num_hidden_units, lr, batch_train=batch_train)
     model.fit()
