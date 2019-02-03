@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.metrics import mean_squared_error, zero_one_loss
 import copy
-
+import matplotlib.pyplot as plt
 
 def kernel(x, mean, std):
     diff = -(np.linalg.norm(x - mean)) ** 2
@@ -88,3 +88,26 @@ def compute_error(targets, predictions, error_type='are', binary=False):
         loss = zero_one_loss(targets, predictions, normalize=True)
 
     return loss * 100, error
+
+
+
+def plot_pred_actual(pred, y_test, title):
+    # fig config
+    plt.figure()
+    plt.grid(True)
+    epochs = np.arange(0, len(pred), 1)
+
+    plt.title(title)
+    plt.plot(epochs, pred, color='r', label="Prediction")
+    plt.plot(epochs, y_test, color='b', label="Actual")
+    plt.xlabel('time')
+    plt.ylabel('Absolut residual error')
+    plt.legend()
+    plt.show()
+
+    plt.figure()
+    plt.plot(epochs,np.abs(pred-y_test),color='r',label = 'Difference')
+    plt.xlabel('time')
+    plt.ylabel('Absolute residual error')
+    plt.legend()
+    plt.show()
