@@ -38,14 +38,11 @@ class rbf_model(object):
         if self.batch_train:
             self.weights = np.linalg.solve(np.dot(self.transformed_data.T, self.transformed_data),
                                            np.dot(self.transformed_data.T, self.targets))
-            # self.weights = np.linalg.inv(np.dot(self.transformed_data.T, self.transformed_data)).dot(
-            #     self.transformed_data.T).dot(self.targets)
-
 
         else:
             self.weights += (self.learning_rate * np.dot((self.targets - f_approx).T, self.transformed_data)).T
 
-    def fit(self, x_test, y_test):
+    def fit(self):
 
         error = self.threshold + 1
         counter = 0
@@ -54,13 +51,11 @@ class rbf_model(object):
             # we shuffle and then calculate kernels again
             [self.data, self.targets, self.transformed_data] = shuffle(self.data, self.targets, self.transformed_data)
 
-            f_approx = self.forward_pass(self.data)
+            f_approx = self.forward_pass(self.transformed_data)
 
             self.update_weights(f_approx)
 
-            train_error = self.evaluate(self.data, self.targets)
-
-            test_error = self.evaluate(x_test, y_test)
+            train_error = self.evaluate(self.transformed_data, self.targets)
 
             counter += 1
             # if error < self.threshold:
@@ -68,21 +63,21 @@ class rbf_model(object):
 
             if batch_train:
                 print("number of hidden units: {0} and train Error: {1}".format(self.n_hidden_units, train_error))
-                print("number of hidden units: {0} and test Error: {1}".format(self.n_hidden_units, test_error))
                 break
 
             print("Epoch: {0} and Error: {1}".format(counter, train_error))
         return self.weights
 
-    def forward_pass(self, data):
-        self.transformed_data = self.calculate_transformed_data(data)
-        f_approx = np.dot(self.weights.T, self.transformed_data.T)
+    def forward_pass(self, data, transform=False):
+        if transform:
+            data = self.calculate_transformed_data(data)
+        f_approx = np.dot(self.weights.T, data.T)
         return f_approx.T
 
-    def evaluate(self, data, targets):
+    def evaluate(self, data, targets, transform=False):
 
-        transformed = self.forward_pass(data)
-        _, error = Utils.compute_error(targets, transformed)
+        predictions = self.forward_pass(data, transform)
+        _, error = Utils.compute_error(predictions, targets)
         return error
 
 
@@ -101,15 +96,16 @@ if __name__ == "__main__":
     mean = Utils.even_rbf_center(n_hidden_units)
 
     model = rbf_model(x_train, y_train, mean, cov, n_epochs, n_hidden_units, lr, batch_train=batch_train)
-    model.fit(x_test, y_test)
+    model.fit()
 
-    for i in np.arange(1, len(x_train)-1, 1):
+    for i in np.arange(1, len(x_train) - 1, 1):
         # mean = Utils.compute_rbf_centers_competitive_learning(x_train, i, 1, 100)
 
         mean = Utils.compute_rbf_centers(i)
 
         model = rbf_model(x_train, y_train, mean, cov, n_epochs, i, lr, batch_train=batch_train)
 
-        model.fit(x_test, y_test)
+        model.fit()
 
-        model.evaluate(x_test, y_test)
+        error = model.evaluate(x_test, y_test, transform=True)
+        print("number of hidden units: {0} and test Error: {1}".format(i, error))
