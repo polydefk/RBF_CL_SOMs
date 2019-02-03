@@ -2,10 +2,11 @@ import numpy as np
 from sklearn.metrics import mean_squared_error, zero_one_loss
 import copy
 
-def kernel(x, mean, std):
-    diff = -np.square(x - mean)
 
-    standarized = diff / (2 * np.square(std))
+def kernel(x, mean, std):
+    diff = -(np.linalg.norm(x - mean)) ** 2
+
+    standarized = diff / (2 * std ** 2)
 
     return np.exp(standarized)
 
@@ -19,7 +20,8 @@ def compute_rbf_centers(count):
 def compute_rbf_centers_competitive_learning(data, num_centers, eta, iterations):
     np.random.shuffle(data)
 
-    rbf_centers = copy.deepcopy(data[0:num_centers])
+    rbf_centers = copy.deepcopy(data[0:num_centers])  # can use mean of data
+
     for j in range(iterations):
         random_datapoint = data[np.random.randint(0, len(data)), :]
 
@@ -60,6 +62,16 @@ def create_dataset(type, noise=0):
         y_train = [-1.0 if i >= 0.0 else 1.0 for i in y_train]
         y_test = [-1.0 if i >= 0.0 else 1.0 for i in y_test]
         return x_train, y_train, x_test, y_test
+
+
+def even_rbf_center(count):
+    mu_list = []
+    for i in range(count):
+        mu_list.append(i * 2 * np.pi / (count))
+
+    mu_list = np.reshape(np.array(mu_list), (len(mu_list), 1))
+
+    return mu_list
 
 
 def compute_error(targets, predictions, error_type='are', binary=False):
