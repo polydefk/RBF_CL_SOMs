@@ -5,11 +5,14 @@ from sklearn.metrics import mean_squared_error, zero_one_loss
 def kernel(x, mean, std):
     diff = -np.square(x - mean)
 
-    standarized = diff / 2 * np.square(std)
+    standarized = diff / (2 * np.square(std))
 
-    K = np.exp(standarized)
+    return np.exp(standarized)
 
-    return K
+def compute_rbf_centers(count):
+    means = np.arange(0, 2*np.pi, (2*np.pi)/count )
+    means = np.reshape(np.array(means), (len(means),1))
+    return means
 
 
 def create_dataset(type):
@@ -20,6 +23,9 @@ def create_dataset(type):
 
     x_test = np.arange(0.05, 2 * np.pi, step)
     y_test = np.sin(2 * x_test)
+
+    x_train = np.reshape(x_train, (x_train.shape[0], 1))
+    x_test = np.reshape(x_test, (x_test.shape[0], 1))
 
     y_train = np.reshape(y_train, (y_train.shape[0],1))
     y_test = np.reshape(y_test, (y_test.shape[0],1))
