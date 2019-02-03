@@ -5,8 +5,6 @@ import Utils
 np.random.seed(1)
 
 
-
-
 class rbf_model(object):
     def __init__(self, data, targets, mean, cov, n_epochs, n_hidden_units, learning_rate, threshold=0.1,
                  error_type='delta', batch_train=False):
@@ -81,6 +79,9 @@ class rbf_model(object):
         return error
 
 
+
+
+
 if __name__ == "__main__":
     input_type = 'sin'
 
@@ -94,6 +95,10 @@ if __name__ == "__main__":
     cov = 0.2
 
     x_train, y_train, x_test, y_test = Utils.create_dataset(input_type)
+
+    mean = Utils.compute_rbf_centers_competitive_learning(x_train, n_hidden_units, 1, 100)
+
+
 
     model = rbf_model(x_train, y_train, mean, cov, n_epochs, n_hidden_units, lr, batch_train=batch_train)
     model.fit()

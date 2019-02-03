@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.metrics import mean_squared_error, zero_one_loss
-
+import copy
 
 def kernel(x, mean, std):
     diff = -np.square(x - mean)
@@ -9,10 +9,27 @@ def kernel(x, mean, std):
 
     return np.exp(standarized)
 
+
 def compute_rbf_centers(count):
-    means = np.arange(0, 2*np.pi, (2*np.pi)/count )
-    means = np.reshape(np.array(means), (len(means),1))
+    means = np.arange(0, 2 * np.pi, (2 * np.pi) / count)
+    means = np.reshape(np.array(means), (len(means), 1))
     return means
+
+
+def compute_rbf_centers_competitive_learning(data, num_centers, eta, iterations):
+    np.random.shuffle(data)
+
+    rbf_centers = copy.deepcopy(data[0:num_centers])
+    for j in range(iterations):
+        random_datapoint = data[np.random.randint(0, len(data)), :]
+
+        distances = []
+        for center in rbf_centers:
+            distances = np.append(distances, (np.linalg.norm(center - random_datapoint)))
+
+        closer_rbf_center = distances.argmin()
+        rbf_centers[closer_rbf_center] += eta * (random_datapoint - rbf_centers[closer_rbf_center])
+    return rbf_centers
 
 
 def create_dataset(type, noise=0):
@@ -21,15 +38,14 @@ def create_dataset(type, noise=0):
     x_train = np.arange(0, 2 * np.pi, step)
     y_train = np.sin(2 * x_train)
 
-
     x_test = np.arange(0.05, 2 * np.pi, step)
     y_test = np.sin(2 * x_test)
 
     x_train = np.reshape(x_train, (x_train.shape[0], 1))
     x_test = np.reshape(x_test, (x_test.shape[0], 1))
 
-    y_train = np.reshape(y_train, (y_train.shape[0],1))
-    y_test = np.reshape(y_test, (y_test.shape[0],1))
+    y_train = np.reshape(y_train, (y_train.shape[0], 1))
+    y_test = np.reshape(y_test, (y_test.shape[0], 1))
 
     if noise > 0:
         x_train += np.random.normal(0, noise, x_train.shape)
