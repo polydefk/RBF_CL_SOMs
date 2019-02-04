@@ -27,56 +27,61 @@ class SOM(object):
 
         self.weights = np.random.normal(size=shape)
         self.n_epochs = n_epochs
-        self.eta = eta
-        self.neighbors = None
         self.neighbors_num = 50
-        self.a = 0.5
+        self.eta = eta
 
     def fit(self, data):
         for epoch in range(self.n_epochs):
-            for idx in range(data.shape[0]):
-                point = data[idx, :]
+            for point in data:
 
-                sorted_dist, sorted_ind = self.find_sorted_distances_indices(point)
+                distance = self.get_distance_matrix(point)
+                winner = np.argmin(distance)
 
-                self.neighbors = np.zeros(self.weights.shape[0])
+                min_boundary = max(0, winner - self.neighbors_num)
 
-                self.neighbors[sorted_ind[0:self.neighbors_num]] = 1
+                max_boundary = min(100, winner + self.neighbors_num)
 
-                self.update_weights(point)
-
+                self.update_weights(point, min_boundary, max_boundary)
             self.update_params(epoch)
+
+    def predict(self, test):
+        indices = []
+        for point in test:
+
+            distance = self.get_distance_matrix(point)
+            winner = np.argmin(distance)
+            indices.append(winner)
+
+        return np.array(indices)
 
     def get_distance(self, x, y):
         sub = x - y
-        dist = np.dot(sub.T, sub)  # we skip the square because we only care about the index of the distance
-        # print(dist)
+        dist = np.dot(sub.T, sub)
         return dist
 
-    def find_sorted_distances_indices(self, point):
+    def get_distance_matrix(self, point):
         distances = []
         for i in range(self.weights.shape[0]):
             dist = self.get_distance(self.weights[i, :], point)
             distances.append(dist)
+        return np.array(distances)
 
-        indices = sorted(range(len(distances)), key=distances.__getitem__)
-        sorted_dist = sorted(distances)
-
-        return sorted_dist, indices
-
-    def update_weights(self, point):
-
-        for i in range(self.weights.shape[0]):
-            dist = self.get_distance(self.weights[i, :], point)
-
-            self.weights[i, :] += self.eta * self.neighbors * dist
+    def update_weights(self, point, min_boundary, max_boundary):
+        for j in range(min_boundary, max_boundary):
+            self.weights[j] += self.eta * (point - self.weights[j])
 
     def update_params(self, epoch):
-        self.eta = self.a * (self.eta ** (epoch / self.n_epochs))
-        self.neighbors_num = self.a * (self.neighbors_num ** (epoch / self.n_epochs))
+        self.neighbors_num = int(self.neighbors_num * (1 - epoch / self.n_epochs))
+
 
 
 if __name__ == "__main__":
     props, names, shape, epochs, eta = load_animals()
     som = SOM(shape=shape, n_epochs=epochs, eta=eta)
     som.fit(props)
+
+    pred_indices = som.predict(props)
+
+    Z = [x for _, x in sorted(zip(pred_indices, names))]
+
+    print(np.transpose(Z))
