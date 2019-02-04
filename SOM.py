@@ -24,40 +24,51 @@ def load_animals():
 
 class SOM(object):
     def __init__(self, shape, n_epochs, eta):
+
         self.weights = np.random.normal(size=shape)
         self.n_epochs = n_epochs
         self.eta = eta
+        self.neighbors = None
 
     def fit(self, data):
-        for epoch in range(self.n_epochs):
-            for idx in range(data.shape[0]):
-                point = data[idx, :]
-                winner_idx = self.find_minimum_distance(point)  # chicken dinner
-                self.find_neighborhood(epoch)
+        # for epoch in range(self.n_epochs):
+        neighbors_num = 50
+        for idx in range(data.shape[0]):
+            point = data[idx, :]
+
+            sorted_dist, sorted_ind = self.find_sorted_distances_indices(point)
+
+            self.neighbors = np.zeros(self.weights.shape[0])
+
+            self.neighbors[sorted_ind[0:neighbors_num]] = 1
+
+            self.update_weights(point)
+
     def get_distance(self, x, y):
         sub = x - y
         dist = np.dot(sub.T, sub)  # we skip the square because we only care about the index of the distance
         # print(dist)
         return dist
 
-    def find_minimum_distance(self, point):
+    def find_sorted_distances_indices(self, point):
         # print(self.weights.shape)
 
-        min_dist = self.get_distance(self.weights[0, :], point)
-        min_index = 0
+        distances = []
         for i in range(self.weights.shape[0]):
             dist = self.get_distance(self.weights[i, :], point)
-            if dist < min_dist:
-                min_dist = dist
-                min_index = i
+            distances.append(dist)
 
-        return min_index
+        indices = sorted(range(len(distances)), key=distances.__getitem__)
+        sorted_dist = sorted(distances)
 
-    def find_neighborhood(self,epoch):
-        pass
+        return sorted_dist, indices
 
-    def update_weights(self):
-        pass
+    def update_weights(self,point):
+
+        for i in range(self.weights.shape[0]):
+            dist = self.get_distance(self.weights[i, :], point)
+
+            self.weights[i, :] += self.eta * self.neighbors * dist
 
 
 if __name__ == "__main__":
