@@ -29,20 +29,23 @@ class SOM(object):
         self.n_epochs = n_epochs
         self.eta = eta
         self.neighbors = None
+        self.neighbors_num = 50
+        self.a = 0.5
 
     def fit(self, data):
-        # for epoch in range(self.n_epochs):
-        neighbors_num = 50
-        for idx in range(data.shape[0]):
-            point = data[idx, :]
+        for epoch in range(self.n_epochs):
+            for idx in range(data.shape[0]):
+                point = data[idx, :]
 
-            sorted_dist, sorted_ind = self.find_sorted_distances_indices(point)
+                sorted_dist, sorted_ind = self.find_sorted_distances_indices(point)
 
-            self.neighbors = np.zeros(self.weights.shape[0])
+                self.neighbors = np.zeros(self.weights.shape[0])
 
-            self.neighbors[sorted_ind[0:neighbors_num]] = 1
+                self.neighbors[sorted_ind[0:self.neighbors_num]] = 1
 
-            self.update_weights(point)
+                self.update_weights(point)
+
+            self.update_params(epoch)
 
     def get_distance(self, x, y):
         sub = x - y
@@ -51,8 +54,6 @@ class SOM(object):
         return dist
 
     def find_sorted_distances_indices(self, point):
-        # print(self.weights.shape)
-
         distances = []
         for i in range(self.weights.shape[0]):
             dist = self.get_distance(self.weights[i, :], point)
@@ -63,12 +64,16 @@ class SOM(object):
 
         return sorted_dist, indices
 
-    def update_weights(self,point):
+    def update_weights(self, point):
 
         for i in range(self.weights.shape[0]):
             dist = self.get_distance(self.weights[i, :], point)
 
             self.weights[i, :] += self.eta * self.neighbors * dist
+
+    def update_params(self, epoch):
+        self.eta = self.a * (self.eta ** (epoch / self.n_epochs))
+        self.neighbors_num = self.a * (self.neighbors_num ** (epoch / self.n_epochs))
 
 
 if __name__ == "__main__":
