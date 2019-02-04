@@ -3,6 +3,10 @@ from sklearn.metrics import mean_squared_error, zero_one_loss
 import copy
 import matplotlib.pyplot as plt
 
+np.random.seed(123)
+
+
+
 def kernel(x, mean, std):
     diff = -(np.linalg.norm(x - mean)) ** 2
 
@@ -21,10 +25,16 @@ def compute_rbf_centers_competitive_learning(data, num_centers, eta, iterations,
 
     rbf_centers = np.linspace(0, 2 * np.pi, num_centers)
     rbf_centers = np.reshape(rbf_centers, (rbf_centers.shape[0],1))
-    data = np.reshape(data, (data.shape[0],))
+
+    # rbf_centers = []
+    # ind = np.arange(0, data.shape[0])
+    # for i in range(num_centers):
+    #     rbf_centers.append(data[np.random.choice(ind), :])
+    # rbf_centers = np.reshape(rbf_centers, (num_centers,2))
+
 
     for j in range(iterations):
-        random_datapoint = np.random.choice(data)
+        random_datapoint = data[np.random.choice(data.shape[0]),:]
 
         # euclidean distance
         distances = []
@@ -74,6 +84,39 @@ def create_dataset(type, noise=0):
         y_test += np.random.normal(0, noise, y_test.shape)
 
     return x_train, y_train, x_test, y_test
+
+
+
+def load_ballist_data():
+    data = []
+    with open('data_lab2/ballist.dat', 'r') as f:
+        next = f.readline()
+        while next != "":
+            list = next.replace('\t',' ').replace('\n', '').split(' ')
+            list = [float(i) for i in list]
+            data.append(list)
+            next = f.readline()
+
+    train = np.copy(data)
+    train_data = train[:,0:2]
+    train_labels = train[:,2:4]
+
+    data = []
+    with open('data_lab2/balltest.dat', 'r') as f:
+        next = f.readline()
+        while next != "":
+            list = next.replace('\t',' ').replace('\n', '').split(' ')
+            list = [float(i) for i in list]
+            data.append(list)
+            next = f.readline()
+
+    test = np.copy(data)
+    test_data = test[:,0:2]
+    test_labels = test[:,2:4]
+
+    return train_data, train_labels, test_data, test_labels
+
+
 
 def even_rbf_center(count):
     mu_list = []
@@ -163,3 +206,6 @@ def plot_error_nodes(error, nodes, legend_names, title):
     plt.legend(legend_names, loc='upper right')
 
     plt.show()
+
+
+

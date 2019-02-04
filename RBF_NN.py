@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.utils import shuffle
 import Utils
 
-np.random.seed(1)
+np.random.seed(123)
 
 
 class rbf_model(object):
@@ -80,7 +80,6 @@ class rbf_model(object):
 
 if __name__ == "__main__":
     input_type = 'sin'
-    np.random.seed(123)
     num_hidden_units = 20
     noise = 0.1
     lr = 0.2

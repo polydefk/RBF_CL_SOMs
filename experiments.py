@@ -220,6 +220,30 @@ def run_comp_learning():
     print(error)
 
 
+def experimen_2d_data():
+    x_train, y_train, x_test, y_test = Utils.load_ballist_data()
+
+    num_hidden_units = 20
+    lr = 0.1
+    n_epochs = 300
+    batch_train = False
+
+    threshold = 0
+    cov = 0.1
+
+    mean = Utils.compute_rbf_centers_competitive_learning(x_train, num_hidden_units, eta=0.2, iterations=600, threshold=threshold)
+
+    model = rbf_model(x_train, y_train, mean, cov, n_epochs, num_hidden_units, lr, batch_train=batch_train)
+    model.fit()
+
+    predictions = model.forward_pass(x_test, True)
+    error = model.evaluate(x_test, y_test, transform=True)
+    print(error)
+
+
+
+
+
 if __name__ == "__main__":
     # run_comp_learning()
 
@@ -233,3 +257,5 @@ if __name__ == "__main__":
     # experiment_competitive_learning()
 
     experiment_competitive_learning_vanilla_comparison()
+
+    experimen_2d_data()
