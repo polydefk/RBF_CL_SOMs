@@ -7,8 +7,8 @@ def experiment_rbf_with_noise():
     input_type = 'sin'
     np.random.seed(123)
     noise = 0.1
-    lr = 1
-    n_epochs = 300
+    lr = 0.1
+    n_epochs = 200
     batch_train = False
     cov = 0.2
 
@@ -18,10 +18,10 @@ def experiment_rbf_with_noise():
     best_error = 100
     best_node = -1
 
-    for i in np.arange(1, 30, 1):
+    for i in np.arange(1, 49, 1):
 
-        mean = Utils.compute_rbf_centers(i)
-        # mean = Utils.compute_rbf_centers_competitive_learning(x_train, i, eta=0.2, iterations=100,threshold=1)
+        # mean = Utils.compute_rbf_centers(i)
+        mean = Utils.compute_rbf_centers_competitive_learning(x_train, i, eta=0.2, iterations=600,threshold=0.2)
 
         model = rbf_model(x_train, y_train, mean, cov, n_epochs, i, lr, batch_train=batch_train)
 
@@ -47,17 +47,17 @@ def experiment_competitive_learning():
     num_hidden_units = 5
     noise = 0.1
     lr_ = 0.2
-    n_epochs = 200
+    n_epochs = 100
     batch_train = False
 
-    cov = 1
+    cov = 0.5
     x_train, y_train, x_test, y_test = Utils.create_dataset(input_type, noise=noise)
 
 
-    [predictions, error] = run_rbf_expe(units=20, noise=noise, lr=lr_,
+    [predictions, error] = run_rbf_expe(units=60, noise=noise, lr=lr_,
                                                                 epochs=n_epochs,batch=batch_train, cov=cov, competitive=False)
 
-    [predictions_competitive, error_competitive] = run_rbf_expe(units=10, noise=noise, lr=lr_,
+    [predictions_competitive, error_competitive] = run_rbf_expe(units=9, noise=noise, lr=lr_,
                                                                 epochs=n_epochs,batch=batch_train, cov=cov, competitive=True)
 
 
@@ -67,12 +67,12 @@ def experiment_competitive_learning():
 
     error = [predictions, predictions_competitive]
     legend = ['Manual init', 'Competitive init', 'Actual']
-    Utils.plot_many_lines(error, y_test, legend, 'RBF network with noise 0.1 on data,  nodes : {0} , lr : {1} , epochs : {2}'
-                                .format(num_hidden_units,lr_, n_epochs))
+    Utils.plot_many_lines(error, y_test, legend, 'RBF network with lr : {1} , epochs : {2}, width : {3}'
+                                .format(num_hidden_units,lr_, n_epochs,cov))
 
 
 
-def run_rbf_expe( units = 9, noise = 0, lr = 0 , epochs = 500 , batch = True, cov = 0.3, competitive = True):
+def run_rbf_expe( units = 9, noise = 0, lr = 0 , epochs = 500 , batch = True, cov = 0.3, competitive = True, threshold=0):
     input_type = 'sin'
     np.random.seed(123)
     num_hidden_units = units
@@ -84,11 +84,12 @@ def run_rbf_expe( units = 9, noise = 0, lr = 0 , epochs = 500 , batch = True, co
     x_train, y_train, x_test, y_test = Utils.create_dataset(input_type, noise=noise)
 
     if competitive:
-        mean_competitive = Utils.compute_rbf_centers_competitive_learning(x_train, num_hidden_units, eta=0.2, iterations=600)
+        mean = Utils.compute_rbf_centers_competitive_learning(x_train, num_hidden_units, eta=0.2,
+                                                              iterations=600,threshold=threshold)
     else:
-        mean_competitive = Utils.compute_rbf_centers(num_hidden_units)
+        mean = Utils.compute_rbf_centers(num_hidden_units)
 
-    model_competitive = rbf_model(x_train, y_train, mean_competitive, cov, n_epochs, num_hidden_units, lr, batch_train=batch_train)
+    model_competitive = rbf_model(x_train, y_train, mean, cov, n_epochs, num_hidden_units, lr, batch_train=batch_train)
     model_competitive.fit()
 
     predictions_competitive = model_competitive.forward_pass(x_test, True)
@@ -136,31 +137,27 @@ def experiment_competitive_learning_vanilla_comparison():
     np.random.seed(123)
     num_hidden_units = 5
     noise = 0.1
-    lr = 1
-    n_epochs = 500
+    lr_ = 0.2
+    n_epochs = 100
     batch_train = False
 
-    cov = 1
+    cov = 0.5
     x_train, y_train, x_test, y_test = Utils.create_dataset(input_type, noise=noise)
 
+    [predictions, error] = run_rbf_expe(units=5, noise=noise, lr=lr_,
+                                        epochs=n_epochs, batch=batch_train, cov=cov, competitive=True, threshold = 0)
 
-    [predictions, error] = run_rbf_expe(units=5, noise=0.1, lr=lr,
-                                                                epochs=n_epochs,batch=batch_train, cov=cov, competitive=False)
-
-    [predictions_competitive, error_competitive] = run_rbf_expe(units=5, noise=0.1, lr=lr,
-                                                                epochs=n_epochs,batch=batch_train, cov=cov, competitive=True)
-
+    [predictions_competitive, error_competitive] = run_rbf_expe(units=5, noise=noise, lr=lr_,
+                                                                epochs=n_epochs, batch=batch_train, cov=cov,
+                                                                competitive=True, threshold = 0.2)
 
     print("number of hidden units: {0} test Error: {1}".format(num_hidden_units, error))
     print("competitive number of hidden units: {0} test Error: {1}".format(num_hidden_units, error_competitive))
 
-
     error = [predictions, predictions_competitive]
-    legend = ['Manual init', 'Competitive init', 'Actual']
-    Utils.plot_many_lines(error, y_test, legend, 'RBF network with noise 0.1 on data,  nodes : {0} , lr : {1} , epochs : {2}'
-                                .format(num_hidden_units,lr, n_epochs))
-
-
+    legend = ['Vanilla CL', 'Many winners CL', 'Actual']
+    Utils.plot_many_lines(error, y_test, legend, 'CL Comparison trained with with lr : {1} , epochs : {2}, width : {3}'
+                          .format(num_hidden_units, lr_, n_epochs, cov))
 
 
 def experiment_plot_error_with_nodes():
@@ -201,13 +198,38 @@ def experiment_plot_error_with_nodes():
     Utils.plot_error_nodes(errors, num_nodes, ['error'],'seq noisy RBF , sin(2x) lr : {0}, sigma : {1}'.format(lr,cov))
 
 
+def run_comp_learning():
+    input_type = 'sin'
+    np.random.seed(123)
+    num_hidden_units = 20
+    noise = 0.1
+    lr = 0.2
+    n_epochs = 100
+    batch_train = False
+
+    cov = 0.5
+    x_train, y_train, x_test, y_test = Utils.create_dataset(input_type, noise)
+
+    mean = Utils.compute_rbf_centers(num_hidden_units)
+
+    model = rbf_model(x_train, y_train, mean, cov, n_epochs, num_hidden_units, lr, batch_train=batch_train)
+    model.fit()
+
+    predictions = model.forward_pass(x_test, True)
+    error = model.evaluate(x_test, y_test, transform=True)
+    print(error)
+
+
 if __name__ == "__main__":
+    # run_comp_learning()
+
+
     # experiment_plot_error_with_nodes()
 
     # experiment_batch_without_noise()
 
     # experiment_rbf_with_noise()
 
-    experiment_competitive_learning()
+    # experiment_competitive_learning()
 
-    # experiment_competitive_learning_vanilla_comparison()
+    experiment_competitive_learning_vanilla_comparison()
