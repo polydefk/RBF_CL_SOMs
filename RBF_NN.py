@@ -6,7 +6,7 @@ np.random.seed(1)
 
 
 class rbf_model(object):
-    def __init__(self, data, targets, mean, cov, n_epochs, n_hidden_units, learning_rate, threshold=0.1,
+    def __init__(self, data, targets, mean, cov, n_epochs, n_hidden_units, learning_rate,
                  error_type='delta', batch_train=False):
         self.data = data
         self.targets = targets
@@ -14,7 +14,6 @@ class rbf_model(object):
         self.cov = cov
         self.error_type = error_type
         self.n_epochs = n_epochs
-        self.threshold = threshold
         self.n_hidden_units = n_hidden_units
         self.learning_rate = learning_rate
         self.batch_train = batch_train
@@ -36,33 +35,28 @@ class rbf_model(object):
     def update_weights(self, f_approx):
         # if batch use least squares else delta rule
         if self.batch_train:
+
             self.weights = np.linalg.solve(np.dot(self.transformed_data.T, self.transformed_data),
                                            np.dot(self.transformed_data.T, self.targets))
 
         else:
             for data_index in range(len(self.data)):
-                error = self.targets[data_index] - f_approx[data_index]
+                error_ = self.targets[data_index] - np.dot(self.weights.T, np.reshape(self.transformed_data[data_index, :],(self.transformed_data[data_index, :].shape[0],1)))
+                self.weights += (self.learning_rate * error_ * self.transformed_data[data_index, :]).T
 
-                # inner = self.targets[data_index] - np.dot(self.transformed_data[data_index, :], self.weights)
-                self.weights = np.add(self.weights, np.reshape(self.learning_rate * error *
-                                                               np.transpose(self.transformed_data[data_index, :]),
-                                                               np.shape(self.weights)))
 
     def fit(self):
 
         train_error = 0
         for i in range(self.n_epochs):
             # we shuffle and then calculate kernels again
-            [self.data, self.targets, self.transformed_data] = shuffle(self.data, self.targets, self.transformed_data)
+            # [self.data, self.targets, self.transformed_data] = shuffle(self.data, self.targets, self.transformed_data)
 
             f_approx = self.forward_pass(self.transformed_data)
 
             self.update_weights(f_approx)
 
             train_error = self.evaluate(self.transformed_data, self.targets)
-
-            if train_error < self.threshold:
-                break
 
             if self.batch_train:
                 print("number of hidden units: {0} train Error: {1}".format(self.n_hidden_units, train_error))
@@ -87,15 +81,20 @@ class rbf_model(object):
 if __name__ == "__main__":
     input_type = 'sin'
     np.random.seed(123)
-    num_hidden_units = 7
+    num_hidden_units = 20
     noise = 0.1
-    lr = 0.001
-    n_epochs = 100
+    lr = 0.2
+    n_epochs = 300
     batch_train = False
 
     cov = 1
     x_train, y_train, x_test, y_test = Utils.create_dataset(input_type, noise)
 
     mean = Utils.compute_rbf_centers(num_hidden_units)
+
     model = rbf_model(x_train, y_train, mean, cov, n_epochs, num_hidden_units, lr, batch_train=batch_train)
     model.fit()
+
+    predictions = model.forward_pass(x_test, True)
+    error = model.evaluate(x_test, y_test, transform=True)
+    print(error)

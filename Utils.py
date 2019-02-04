@@ -17,10 +17,10 @@ def compute_rbf_centers(count):
     return means
 
 
-def compute_rbf_centers_competitive_learning(data, num_centers, eta, iterations):
+def compute_rbf_centers_competitive_learning(data, num_centers, eta, iterations, threshold = 0):
     np.random.shuffle(data)
 
-    rbf_centers = copy.deepcopy(data[0:num_centers])  # can use mean of data
+    rbf_centers = copy.deepcopy(data[0:num_centers])
 
     for j in range(iterations):
         random_datapoint = data[np.random.randint(0, len(data)), :]
@@ -29,8 +29,11 @@ def compute_rbf_centers_competitive_learning(data, num_centers, eta, iterations)
         for center in rbf_centers:
             distances = np.append(distances, (np.linalg.norm(center - random_datapoint)))
 
-        closer_rbf_center = distances.argmin()
-        rbf_centers[closer_rbf_center] += eta * (random_datapoint - rbf_centers[closer_rbf_center])
+        if threshold == 0:
+            indices = distances.argmin()
+        else:
+            indices = np.where(distances < threshold)
+        rbf_centers[indices] += eta * (random_datapoint - rbf_centers[indices])
     return rbf_centers
 
 
@@ -113,4 +116,45 @@ def plot_pred_actual(pred, y_test, title):
     plt.xlabel('time')
     plt.ylabel('Absolute residual error')
     plt.legend()
+    plt.show()
+
+
+def plot_many_lines(error, y_test, legend_names, title):
+    # fig config
+    plt.figure()
+    plt.grid(True)
+
+    epochs = np.arange(0, len(y_test), 1)
+
+    plt.ylim(-1.55,2)
+    for i in range(len(error)):
+        plt.plot(epochs, error[i][:])
+
+    plt.plot(epochs, y_test)
+
+    plt.xlabel('time')
+    plt.ylabel('Absolut residual error')
+
+    plt.title(title)
+    plt.legend(legend_names, loc='upper left')
+
+    plt.show()
+
+
+def plot_error_nodes(error, nodes, legend_names, title):
+    # fig config
+    plt.figure()
+    plt.grid(True)
+
+
+    plt.ylim(0,1)
+    plt.xlim(1, nodes)
+    plt.plot(np.arange(0, nodes, 1), error)
+
+    plt.xlabel('time')
+    plt.ylabel('Absolut residual error')
+
+    plt.title(title)
+    plt.legend(legend_names, loc='upper right')
+
     plt.show()
