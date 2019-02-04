@@ -54,16 +54,19 @@ def experiment_competitive_learning():
     x_train, y_train, x_test, y_test = Utils.create_dataset(input_type, noise=noise)
 
 
-    [predictions, error] = run_rbf_expe(units=60, noise=noise, lr=lr_,
+    [predictions, error,  mean] = run_rbf_expe(units=9, noise=noise, lr=lr_,
                                                                 epochs=n_epochs,batch=batch_train, cov=cov, competitive=False)
 
-    [predictions_competitive, error_competitive] = run_rbf_expe(units=9, noise=noise, lr=lr_,
+    [predictions_competitive, error_competitive, mean_competitive] = run_rbf_expe(units=9, noise=noise, lr=lr_,
                                                                 epochs=n_epochs,batch=batch_train, cov=cov, competitive=True)
 
 
     print("number of hidden units: {0} test Error: {1}".format(num_hidden_units, error))
     print("competitive number of hidden units: {0} test Error: {1}".format(num_hidden_units, error_competitive))
 
+
+
+    Utils.plot_data_means_1D(x_train, mean, mean_competitive, 'Plot data along with means')
 
     error = [predictions, predictions_competitive]
     legend = ['Manual init', 'Competitive init', 'Actual']
@@ -94,7 +97,7 @@ def run_rbf_expe( units = 9, noise = 0, lr = 0 , epochs = 500 , batch = True, co
 
     predictions_competitive = model_competitive.forward_pass(x_test, True)
     error_competitive = model_competitive.evaluate(x_test, y_test, transform=True)
-    return [predictions_competitive, error_competitive]
+    return [predictions_competitive, error_competitive, mean]
 
 def experiment_batch_without_noise():
     input_type = 'sin'
@@ -223,22 +226,52 @@ def run_comp_learning():
 def experimen_2d_data():
     x_train, y_train, x_test, y_test = Utils.load_ballist_data()
 
-    num_hidden_units = 20
     lr = 0.1
-    n_epochs = 300
+    n_epochs = 200
     batch_train = False
 
     threshold = 0
-    cov = 0.1
+    cov = 0.5
 
-    mean = Utils.compute_rbf_centers_competitive_learning(x_train, num_hidden_units, eta=0.2, iterations=600, threshold=threshold)
+    predictions_ = []
+    best_error = 100
+    best_node = -1
 
-    model = rbf_model(x_train, y_train, mean, cov, n_epochs, num_hidden_units, lr, batch_train=batch_train)
-    model.fit()
+    for i in np.arange(1, 15, 1):
 
-    predictions = model.forward_pass(x_test, True)
-    error = model.evaluate(x_test, y_test, transform=True)
-    print(error)
+        mean = Utils.compute_rbf_centers_competitive_learning(x_train, i, eta=0.2, iterations=600,
+                                                              threshold=threshold)
+
+
+
+
+        model = rbf_model(x_train, y_train, mean, cov, n_epochs, i, lr, batch_train=batch_train)
+        model.fit()
+
+        predictions = model.forward_pass(x_test, True)
+        error = model.evaluate(x_test, y_test, transform=True)
+        print(error)
+
+        if error < best_error:
+            best_error = error
+            best_node = i
+            predictions_ = predictions
+        print("best error {0}, best node {1}".format(best_error, best_node))
+    print("best error {0}, best node {1}".format(best_error, best_node))
+
+    best_mean_cl = Utils.compute_rbf_centers_competitive_learning(x_train, best_node, eta=0.2, iterations=200,
+                                                          threshold=threshold)
+
+    best_means = Utils.compute_rbf_centers(best_node, x_train)
+
+
+    # print(best_mean_cl)
+
+    Utils.plot_data_means(x_train, best_means, best_mean_cl, 'Plot data along with means')
+
+    Utils.plot_pred_actual(predictions_, y_test, 'RBF on 2d data lr : {0}, sigma : {1}'.format(lr, cov))
+
+
 
 
 
@@ -254,8 +287,8 @@ if __name__ == "__main__":
 
     # experiment_rbf_with_noise()
 
-    # experiment_competitive_learning()
+    experiment_competitive_learning()
 
-    experiment_competitive_learning_vanilla_comparison()
+    # experiment_competitive_learning_vanilla_comparison()
 
-    experimen_2d_data()
+    # experimen_2d_data()

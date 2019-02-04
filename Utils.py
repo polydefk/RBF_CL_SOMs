@@ -15,22 +15,36 @@ def kernel(x, mean, std):
     return np.exp(standarized)
 
 
-def compute_rbf_centers(count):
+def compute_rbf_centers(count, data=None):
+
+
     means = np.arange(0, 2 * np.pi, (2 * np.pi) / count)
     means = np.reshape(np.array(means), (len(means), 1))
+
+    if data is not None:
+        means = []
+        ind = np.arange(0, data.shape[0])
+        for i in range(count):
+            index = np.random.choice(ind)
+            means.append(data[index, :])
+
+        means = np.array(means)
+
     return means
 
 
 def compute_rbf_centers_competitive_learning(data, num_centers, eta, iterations, threshold = 0):
+    dimensions = np.shape(data)[1]
 
-    rbf_centers = np.linspace(0, 2 * np.pi, num_centers)
-    rbf_centers = np.reshape(rbf_centers, (rbf_centers.shape[0],1))
-
-    # rbf_centers = []
-    # ind = np.arange(0, data.shape[0])
-    # for i in range(num_centers):
-    #     rbf_centers.append(data[np.random.choice(ind), :])
-    # rbf_centers = np.reshape(rbf_centers, (num_centers,2))
+    if dimensions == 1:
+        rbf_centers = np.linspace(0, 2 * np.pi, num_centers)
+        rbf_centers = np.reshape(rbf_centers, (rbf_centers.shape[0],1))
+    else:
+        rbf_centers = []
+        ind = np.arange(0, data.shape[0])
+        for i in range(num_centers):
+            rbf_centers.append(data[np.random.choice(ind), :])
+        rbf_centers = np.reshape(rbf_centers, (num_centers,2))
 
 
     for j in range(iterations):
@@ -47,6 +61,7 @@ def compute_rbf_centers_competitive_learning(data, num_centers, eta, iterations,
         else:
             values = np.abs(distances-np.min(distances)).T
             indices = np.where(values < threshold)
+        
         rbf_centers[indices] += eta * (random_datapoint - rbf_centers[indices])
 
     return rbf_centers
@@ -152,11 +167,11 @@ def plot_pred_actual(pred, y_test, title):
     epochs = np.arange(0, len(pred), 1)
 
     plt.title(title)
-    plt.plot(epochs, pred, color='r', label="Prediction")
-    plt.plot(epochs, y_test, color='b', label="Actual")
+    plt.plot(epochs, pred, color='r')
+    plt.plot(epochs, y_test, color='b')
     plt.xlabel('time')
     plt.ylabel('Absolut residual error')
-    plt.legend()
+    plt.legend(["Prediction", "","Actual"])
     plt.show()
 
     plt.figure()
@@ -187,6 +202,38 @@ def plot_many_lines(error, y_test, legend_names, title):
     plt.legend(legend_names, loc='upper left')
 
     plt.show()
+
+def plot_data_means(train_data, mean, mean_cl, title):
+
+    plt.figure()
+    plt.grid(True)
+
+    train_data = plt.scatter(train_data[:, 0], train_data[:, 1], c='g', label="train data")
+    nds = plt.scatter(mean[:, 0], mean[:, 1], c='b', label="No CL means")
+    nds_cl = plt.scatter(mean_cl[:, 0], mean_cl[:, 1], c='r', label="CL means")
+
+    plt.title(title)
+
+    plt.ylim(0,1.5)
+
+    plt.legend(handles=[train_data, nds, nds_cl],loc='upper left')
+    plt.show()
+
+def plot_data_means_1D(train_data, mean, mean_cl, title):
+    plt.figure()
+    plt.grid(True)
+
+    train_data = plt.scatter(train_data, np.zeros(train_data.shape), c='g', label="train data")
+    nds = plt.scatter(mean, np.zeros(mean.shape), c='b', label="No CL means", s=10)
+    nds_cl = plt.scatter(mean_cl, np.zeros(mean_cl.shape), c='r', label="CL means", s = 10)
+
+    plt.title(title)
+
+
+    plt.legend(handles=[train_data, nds, nds_cl], loc='upper left')
+    plt.show()
+
+
 
 
 def plot_error_nodes(error, nodes, legend_names, title):

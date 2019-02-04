@@ -10,6 +10,8 @@ class rbf_model(object):
                  error_type='delta', batch_train=False):
         self.data = data
         self.targets = targets
+        self.dimensions = np.shape(data)[1]
+
         self.mean = mean
         self.cov = cov
         self.error_type = error_type
@@ -18,7 +20,7 @@ class rbf_model(object):
         self.learning_rate = learning_rate
         self.batch_train = batch_train
 
-        self.weights = np.random.randn(self.n_hidden_units, 1)
+        self.weights = np.random.randn(self.n_hidden_units, self.dimensions)
         self.transformed_data = self.calculate_transformed_data(data)
 
     def calculate_transformed_data(self, data):
@@ -41,9 +43,12 @@ class rbf_model(object):
 
         else:
             for data_index in range(len(self.data)):
-                error_ = self.targets[data_index] - np.dot(self.weights.T, np.reshape(self.transformed_data[data_index, :],(self.transformed_data[data_index, :].shape[0],1)))
-                self.weights += (self.learning_rate * error_ * self.transformed_data[data_index, :]).T
+                row = self.transformed_data[data_index, :]
 
+                f_approx = np.dot(self.weights.T, row)
+                error_ = self.targets[data_index] - f_approx
+
+                self.weights += self.learning_rate * np.outer(error_, row).T
 
     def fit(self):
 
