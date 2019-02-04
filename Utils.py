@@ -18,22 +18,27 @@ def compute_rbf_centers(count):
 
 
 def compute_rbf_centers_competitive_learning(data, num_centers, eta, iterations, threshold = 0):
-    np.random.shuffle(data)
 
-    rbf_centers = copy.deepcopy(data[0:num_centers])
+    rbf_centers = np.linspace(0, 2 * np.pi, num_centers)
+    rbf_centers = np.reshape(rbf_centers, (rbf_centers.shape[0],1))
+    data = np.reshape(data, (data.shape[0],))
 
     for j in range(iterations):
-        random_datapoint = data[np.random.randint(0, len(data)), :]
+        random_datapoint = np.random.choice(data)
 
+        # euclidean distance
         distances = []
         for center in rbf_centers:
-            distances = np.append(distances, (np.linalg.norm(center - random_datapoint)))
+            distances.append(np.linalg.norm(center - random_datapoint))
+        distances = np.array(distances)
 
         if threshold == 0:
             indices = distances.argmin()
         else:
-            indices = np.where(distances < threshold)
+            values = np.abs(distances-np.min(distances)).T
+            indices = np.where(values < threshold)
         rbf_centers[indices] += eta * (random_datapoint - rbf_centers[indices])
+
     return rbf_centers
 
 

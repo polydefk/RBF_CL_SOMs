@@ -32,7 +32,7 @@ class rbf_model(object):
 
         return K
 
-    def update_weights(self, f_approx):
+    def update_weights(self):
         # if batch use least squares else delta rule
         if self.batch_train:
 
@@ -52,9 +52,9 @@ class rbf_model(object):
             # we shuffle and then calculate kernels again
             # [self.data, self.targets, self.transformed_data] = shuffle(self.data, self.targets, self.transformed_data)
 
-            f_approx = self.forward_pass(self.transformed_data)
+            self.forward_pass(self.transformed_data)
 
-            self.update_weights(f_approx)
+            self.update_weights()
 
             train_error = self.evaluate(self.transformed_data, self.targets)
 
