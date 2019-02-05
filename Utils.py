@@ -347,12 +347,19 @@ def plot_mp_votes(data,names, isDistrict = False, type= None):
         elif type == 'sex':
             fig1.add_subplot(1, 2, i + 1)
         else:
-            plt.subplots_adjust(left= 0.2 ,right = 1,bottom = 0.2,top = 1, wspace = 0.3,hspace = 0.3)
             fig1.add_subplot(5, 6, i + 1)
+
 
         plt.imshow(p / np.sum(p), cmap='jet', vmin=0, vmax=1)
         if isDistrict:
-            name = names[i+1]
+            name = ''
+            if i < 6:
+                name = names[i + 1]
+            # fig1.tight_layout()
+
+            plt.xticks([])
+            plt.yticks([])
+
         else:
             name = names[i]
         plt.title(name)
