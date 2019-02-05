@@ -139,7 +139,7 @@ def load_MPs():
 
 def load_ballist_data():
     data = []
-    with open('data_lab2/ballist.dat', 'r') as f:
+    with open('data/ballist.dat', 'r') as f:
         next = f.readline()
         while next != "":
             list = next.replace('\t',' ').replace('\n', '').split(' ')
