@@ -101,6 +101,39 @@ def create_dataset(type, noise=0):
     return x_train, y_train, x_test, y_test
 
 
+def load_animals():
+    with open('data/animals.dat') as file:
+        lines = file.readlines()
+        props = [line.split(',') for line in lines]
+        props = [int(i) for i in props[0]]
+        props = np.array(props)
+        props = props.reshape((32, 84))
+
+    with open("data/animalnames.txt") as f:
+        lines = f.readlines()
+        names = [line.strip('\t\n') for line in lines]
+        names = np.array(names)
+
+
+    return props, names
+
+def load_cities():
+    cities_data = np.loadtxt('data/cities.dat', delimiter=',', dtype=float)
+    cities_labels = np.arange(0,len(cities_data),1)
+
+    return cities_data, cities_labels
+
+def load_MPs():
+    votes = np.loadtxt('data/votes.dat', delimiter=',', dtype=float)
+    mpnames = np.genfromtxt('data/mpnames.txt', delimiter='\n', dtype=str)
+    mpsex = np.genfromtxt('data/mpsex.dat', delimiter=',', dtype=float)
+    mpdistrict = np.genfromtxt('data/mpdistrict.dat', delimiter=',', dtype=float)
+    mpparty = np.genfromtxt('data/mpparty.dat', delimiter=',', dtype=float)
+    votes = np.reshape(votes, (349, 31))
+    votes_labels = list(range(len(votes)))
+    return votes, mpnames, mpsex, mpdistrict, mpparty, votes, votes_labels
+
+
 
 def load_ballist_data():
     data = []

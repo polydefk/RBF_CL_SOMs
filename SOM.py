@@ -1,31 +1,16 @@
 import numpy as np
+from sklearn.utils import shuffle
 
-np.random.seed(1234)
+import Utils
 
+np.random.seed(123)
 
-def load_animals():
-    with open('data/animals.dat') as file:
-        lines = file.readlines()
-        props = [line.split(',') for line in lines]
-        props = [int(i) for i in props[0]]
-        props = np.array(props)
-        props = props.reshape((32, 84))
-
-    with open("data/animalnames.txt") as f:
-        lines = f.readlines()
-        names = [line.strip('\t\n') for line in lines]
-        names = np.array(names)
-
-    weight_shape = (100, 84)
-    epochs = 20
-    eta = 0.2
-    return props, names, weight_shape, epochs, eta
 
 
 class SOM(object):
     def __init__(self, shape, n_epochs, eta):
 
-        self.weights = np.random.normal(size=shape)
+        self.weights = np.random.random(size=shape)
         self.n_epochs = n_epochs
         self.neighbors_num = 50
         self.eta = eta
@@ -44,15 +29,18 @@ class SOM(object):
                 self.update_weights(point, min_boundary, max_boundary)
             self.update_params(epoch)
 
-    def predict(self, test):
-        indices = []
-        for point in test:
+    def predict(self, test, labels):
+        predictions = []
+        for index in range(test.shape[0]):
+            point = test[index, :].copy()
 
             distance = self.get_distance_matrix(point)
             winner = np.argmin(distance)
-            indices.append(winner)
+            predictions.append([winner, labels[index]])
+        predictions = np.array(predictions, dtype=object)
+        predictions = predictions[predictions[:, 0].argsort()]
+        return predictions
 
-        return np.array(indices)
 
     def get_distance(self, x, y):
         sub = x - y
@@ -76,12 +64,22 @@ class SOM(object):
 
 
 if __name__ == "__main__":
-    props, names, shape, epochs, eta = load_animals()
-    som = SOM(shape=shape, n_epochs=epochs, eta=eta)
+
+
+    props, names = Utils.load_animals()
+    cities_data, cities_labels = Utils.load_cities()
+    votes, mpnames, mpsex, mpdistrict, mpparty, votes, votes_labels = Utils.load_MPs()
+
+    # props = shuffle(props)
+
+    weight_shape = (100, 84)
+    epochs = 20
+    eta = 0.2
+
+
+    som = SOM(shape=weight_shape, n_epochs=epochs, eta=eta)
     som.fit(props)
 
-    pred_indices = som.predict(props)
+    pred = som.predict(props, names)
 
-    Z = [x for _, x in sorted(zip(pred_indices, names))]
-
-    print(np.transpose(Z))
+    print(pred)
