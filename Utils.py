@@ -338,12 +338,14 @@ def plot_animals(pred):
     zwakia = np.array((new_pred[:, 1]))
     print(new_pred)
 
+    points = np.vstack([indices, np.zeros(len(indices))]).T
+
     fig, ax = plt.subplots()
 
     plt.scatter(indices, np.zeros(len(new_pred)))
 
     for i, txt in enumerate(zwakia):
-        ax.annotate(txt, (indices[i], -0.001), rotation=-90)
+        ax.annotate(txt, (indices[i], -0.001), rotation=-65)
 
     plt.title('Topological ordering of animal species')
     plt.show()
