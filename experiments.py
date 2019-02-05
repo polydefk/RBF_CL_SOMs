@@ -310,6 +310,21 @@ def run_cities_experiment():
 
     Utils.plot_cities_tour(cities_data, pred)
 
+def run_mp_votes_experiment():
+    votes, mpnames, mpsex, mpdistrict, mpparty, votes_labels = Utils.load_MPs()
+
+    weight_shape = (100, 31)
+    epochs = 20
+    eta = 0.2
+
+    som = SOM(shape=weight_shape, n_epochs=epochs, eta=eta, neighbors_num=2, neighbohood_function='manhattan')
+    som.fit(votes)
+
+    pred = som.predict(votes, votes_labels)
+
+    print(pred)
+
+
 
 if __name__ == "__main__":
     # run_comp_learning()
@@ -331,6 +346,6 @@ if __name__ == "__main__":
     ############# PART 2 ##################
 
     # run_animals_experiment()
-    run_cities_experiment()
-
+    # run_cities_experiment()
+    run_mp_votes_experiment()
 

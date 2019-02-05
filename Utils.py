@@ -133,7 +133,7 @@ def load_MPs():
     mpparty = np.genfromtxt('data/mpparty.dat', delimiter=',', dtype=float)
     votes = np.reshape(votes, (349, 31))
     votes_labels = list(range(len(votes)))
-    return votes, mpnames, mpsex, mpdistrict, mpparty, votes, votes_labels
+    return votes, mpnames, mpsex, mpdistrict, mpparty, votes_labels
 
 
 
