@@ -300,7 +300,7 @@ def run_cities_experiment():
     epochs = 20
     eta = 0.2
 
-    som = SOM(shape=weight_shape, n_epochs=epochs, eta=eta, neighbors_num=2, neighbohood_function='circular')
+    som = SOM(shape=weight_shape, n_epochs=epochs, eta=eta, neighbors_num=7, neighbohood_function='circular')
     som.fit(cities_data)
 
     pred = som.predict(cities_data, cities_labels)
@@ -320,7 +320,7 @@ def run_mp_votes_experiment():
     som = SOM(shape=weight_shape, n_epochs=epochs, eta=eta, neighbors_num=2, neighbohood_function='manhattan')
     som.fit(votes)
 
-    pred = som.predict(votes, votes_labels)
+    pred = som.predict(votes, mpparty)
 
     print(pred)
 
@@ -346,6 +346,6 @@ if __name__ == "__main__":
     ############# PART 2 ##################
 
     # run_animals_experiment()
-    # run_cities_experiment()
-    run_mp_votes_experiment()
+    run_cities_experiment()
+    # run_mp_votes_experiment()
 

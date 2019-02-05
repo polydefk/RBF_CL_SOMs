@@ -291,22 +291,50 @@ def plot_error_nodes(error, nodes, legend_names, title):
 
 
 def plot_cities_tour(cities_data, cities_prediction):
-    verts = np.empty(cities_data.shape)
-    i = 0
-    for index in cities_prediction[:, 1]:
-        verts[i] = cities_data[index, :]
-        i += 1
+    order = cities_prediction[:,1].astype(int)
 
-    codes = [Path.LINETO] * len(cities_data)
-    codes[0] = Path.MOVETO
-    codes[-1] = Path.CLOSEPOLY
+    sorted_cities = [*sorted(zip(cities_data, order), key=lambda x: x[1])]
+    sorted_cities = np.array([x[0] for x in sorted_cities])
 
-    path = Path(verts, codes)
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    patch = patches.PathPatch(path, lw=2)
-    ax.add_patch(patch)
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
+    ax.annotate('Start', xy=sorted_cities[0, :])
+    ax.annotate('End', xy=sorted_cities[-1, :])
+    plt.xticks([])
+    plt.yticks([])
+    plt.scatter(cities_data[:, 0], cities_data[:, 1])
+    plt.plot(sorted_cities[:, 0], sorted_cities[:, 1])
+
+    plt.title('Route of SOM algorithm')
     plt.show()
 
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.annotate('Start real', xy=cities_data[0, :])
+    ax.annotate('End real', xy=cities_data[-1, :])
+    plt.xticks([])
+    plt.yticks([])
+    plt.title('Route of riginal data')
+    plt.scatter(cities_data[:, 0], cities_data[:, 1])
+    # plt.plot(sorted_cities[:, 0], sorted_cities[:, 1])
+    plt.plot(cities_data[:, 0], cities_data[:, 1])
+
+    plt.show()
+
+
+def plot_animals(pred):
+    fig = plt.figure()
+
+    indices = np.array((pred[:, 0]))
+    zwakia = np.array((pred[:, 1]))
+
+    print(pred)
+
+    fig, ax = plt.subplots()
+
+    plt.scatter(indices, np.zeros(len(pred)))
+
+    for i, txt in enumerate(zwakia):
+        ax.annotate(txt, (indices[i], -0.001), rotation=-90)
+
+    plt.show()
