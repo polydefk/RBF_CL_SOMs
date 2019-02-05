@@ -1,6 +1,7 @@
 import Utils
 import numpy as np
 from RBF_NN import rbf_model
+from SOM import SOM
 
 
 def experiment_rbf_with_noise():
@@ -275,6 +276,39 @@ def experimen_2d_data():
 
 
 
+def run_animals_experiment():
+    props, names = Utils.load_animals()
+
+    # props = shuffle(props)
+
+    weight_shape = (100, 84)
+    epochs = 20
+    eta = 0.2
+
+    som = SOM(shape=weight_shape, n_epochs=epochs, eta=eta, neighbors_num=50)
+    som.fit(props)
+
+    pred = som.predict(props, names)
+
+    print(pred)
+
+
+def run_cities_experiment():
+    cities_data, cities_labels = Utils.load_cities()
+
+    weight_shape = (10, 2)
+    epochs = 20
+    eta = 0.2
+
+    som = SOM(shape=weight_shape, n_epochs=epochs, eta=eta, neighbors_num=2, neighbohood_function='circular')
+    som.fit(cities_data)
+
+    pred = som.predict(cities_data, cities_labels)
+
+    print(pred)
+
+
+    Utils.plot_cities_tour(cities_data, pred)
 
 
 if __name__ == "__main__":
@@ -287,8 +321,16 @@ if __name__ == "__main__":
 
     # experiment_rbf_with_noise()
 
-    experiment_competitive_learning()
+    # experiment_competitive_learning()
 
     # experiment_competitive_learning_vanilla_comparison()
 
     # experimen_2d_data()
+
+
+    ############# PART 2 ##################
+
+    # run_animals_experiment()
+    run_cities_experiment()
+
+

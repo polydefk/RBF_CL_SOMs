@@ -2,6 +2,8 @@ import numpy as np
 from sklearn.metrics import mean_squared_error, zero_one_loss
 import copy
 import matplotlib.pyplot as plt
+from matplotlib.path import Path
+import matplotlib.patches as patches
 
 np.random.seed(123)
 
@@ -288,4 +290,23 @@ def plot_error_nodes(error, nodes, legend_names, title):
     plt.show()
 
 
+def plot_cities_tour(cities_data, cities_prediction):
+    verts = np.empty(cities_data.shape)
+    i = 0
+    for index in cities_prediction[:, 1]:
+        verts[i] = cities_data[index, :]
+        i += 1
+
+    codes = [Path.LINETO] * len(cities_data)
+    codes[0] = Path.MOVETO
+    codes[-1] = Path.CLOSEPOLY
+
+    path = Path(verts, codes)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    patch = patches.PathPatch(path, lw=2)
+    ax.add_patch(patch)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    plt.show()
 
