@@ -320,10 +320,22 @@ def run_mp_votes_experiment():
     som = SOM(shape=weight_shape, n_epochs=epochs, eta=eta, neighbors_num=2, neighbohood_function='manhattan')
     som.fit(votes)
 
-    pred = som.predict(votes, mpparty)
+    pred = som.predict_2_D(votes)
 
-    print(pred)
+    # print(pred)
 
+    party_names = {0: 'No party', 1: 'M', 2: 'Fp', 3: 'S', 4: 'V', 5: 'MP', 6: 'KD', 7: 'C'}
+    sex_names = {0: 'Male', 1: 'Female'}
+    distr_names = {}
+    for i in range(1, 30):
+        distr_names[i] = "District: {}".format(i)
+    party_votes = Utils.generate_dict(pred, party_names, mpparty)
+    sex_votes = Utils.generate_dict(pred, sex_names, mpsex)
+    distr_votes = Utils.generate_dict(pred, distr_names, mpdistrict)
+
+    Utils.plot_mp_votes(sex_votes, sex_names, type='sex')
+    Utils.plot_mp_votes(party_votes, party_names, type = 'party')
+    Utils.plot_mp_votes(distr_votes, distr_names, isDistrict=True)
 
 
 if __name__ == "__main__":
@@ -346,6 +358,6 @@ if __name__ == "__main__":
     ############# PART 2 ##################
 
     # run_animals_experiment()
-    run_cities_experiment()
-    # run_mp_votes_experiment()
+    # run_cities_experiment()
+    run_mp_votes_experiment()
 

@@ -39,6 +39,19 @@ class SOM(object):
         predictions = predictions[predictions[:, 0].argsort()]
         return predictions
 
+    def predict_2_D(self, test):
+        predictions = []
+        for index in range(test.shape[0]):
+            point = test[index, :].copy()
+
+            winner = self.get_winner(point)
+
+            predictions.append((int(winner / 10), winner % 10) )
+
+        predictions = np.array(predictions)
+        # predictions = predictions[predictions[:, 0].argsort()]
+        return predictions
+
     def find_neighbohood(self, point):
         winner = self.get_winner(point)
         neighbors = []

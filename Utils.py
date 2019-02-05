@@ -338,3 +338,31 @@ def plot_animals(pred):
         ax.annotate(txt, (indices[i], -0.001), rotation=-90)
 
     plt.show()
+
+def plot_mp_votes(data,names, isDistrict = False, type= None):
+    fig1 = plt.figure()
+    for i, p in enumerate(data.values()):
+        if type == 'party':
+            fig1.add_subplot(2, 4, i + 1)
+        elif type == 'sex':
+            fig1.add_subplot(1, 2, i + 1)
+        else:
+            plt.subplots_adjust(left= 0.2 ,right = 1,bottom = 0.2,top = 1, wspace = 0.3,hspace = 0.3)
+            fig1.add_subplot(5, 6, i + 1)
+
+        plt.imshow(p / np.sum(p), cmap='jet', vmin=0, vmax=1)
+        if isDistrict:
+            name = names[i+1]
+        else:
+            name = names[i]
+        plt.title(name)
+    plt.show()
+
+def generate_dict(pos, dict_names, data):
+    dict_votes = {}
+    for j in dict_names.keys():
+        dict_votes[j] = np.zeros((10, 10))
+    for i in range(pos.shape[0]):
+        dict_i = data[i]
+        dict_votes[dict_i][pos[i, :][0], pos[i, :][1]] += 1
+    return dict_votes
