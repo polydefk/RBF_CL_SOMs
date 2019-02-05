@@ -329,7 +329,7 @@ def plot_animals(pred):
     new_pred = []
     for key, value in d.items():
         values = pred[pred[:,0] == key ][:,1]
-        string_val = ', '.join(values)  # list comprehension
+        string_val = ', '.join(values)
         new_pred.append((key, string_val))
 
     new_pred = np.array(new_pred)
@@ -337,8 +337,6 @@ def plot_animals(pred):
     indices = np.array((new_pred[:, 0]))
     zwakia = np.array((new_pred[:, 1]))
     print(new_pred)
-
-    points = np.vstack([indices, np.zeros(len(indices))]).T
 
     fig, ax = plt.subplots()
 
