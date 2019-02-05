@@ -323,20 +323,29 @@ def plot_cities_tour(cities_data, cities_prediction):
 
 
 def plot_animals(pred):
-    fig = plt.figure()
 
-    indices = np.array((pred[:, 0]))
-    zwakia = np.array((pred[:, 1]))
+    d = {key: value for (key, value) in pred}
 
-    print(pred)
+    new_pred = []
+    for key, value in d.items():
+        values = pred[pred[:,0] == key ][:,1]
+        string_val = ', '.join(values)  # list comprehension
+        new_pred.append((key, string_val))
+
+    new_pred = np.array(new_pred)
+
+    indices = np.array((new_pred[:, 0]))
+    zwakia = np.array((new_pred[:, 1]))
+    print(new_pred)
 
     fig, ax = plt.subplots()
 
-    plt.scatter(indices, np.zeros(len(pred)))
+    plt.scatter(indices, np.zeros(len(new_pred)))
 
     for i, txt in enumerate(zwakia):
         ax.annotate(txt, (indices[i], -0.001), rotation=-90)
 
+    plt.title('Topological ordering of animal species')
     plt.show()
 
 def plot_mp_votes(data,names, isDistrict = False, type= None):
@@ -364,6 +373,7 @@ def plot_mp_votes(data,names, isDistrict = False, type= None):
             name = names[i]
         plt.title(name)
     plt.show()
+
 
 def generate_dict(pos, dict_names, data):
     dict_votes = {}
